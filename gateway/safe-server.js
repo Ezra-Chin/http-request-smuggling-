@@ -26,6 +26,7 @@ function parseHeaders(headerLines) {
 function readChunkedEnd(buffer, start) {
     let pos = start;
 
+
     while (true) {
         const lineEnd = buffer.indexOf("\r\n", pos);
 
@@ -72,6 +73,7 @@ const server = net.createServer((client) => {
     client.on("data", (chunk) => {
         buffer = Buffer.concat([buffer, chunk]);
 
+        //every line is parsed and chekd , making sure there is not smuggled second request 
         while (true) {
             const headerEnd = buffer.indexOf("\r\n\r\n");
 
@@ -96,7 +98,8 @@ const server = net.createServer((client) => {
                 backend.destroy();
                 return;
             }
-
+            
+            // determine the end of a body , avoiding forwarding teh entire data to backend blindly 
             const bodyStart = headerEnd + 4;
             let bodyEnd;
 
@@ -121,7 +124,7 @@ const server = net.createServer((client) => {
                 bodyEnd = bodyStart;
             }
 
-            console.log(`[SAFE-GATEWAY] ${method} ${path}`);
+            console.log(`${new Date().toISOString()} [SAFE-GATEWAY] ${method} ${path}`);
 
             if (path.split("?")[0].toLowerCase().startsWith("/internal")) {
                 client.write(

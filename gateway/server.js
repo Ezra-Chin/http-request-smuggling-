@@ -15,6 +15,7 @@ const server = net.createServer((client) => {
     backend.on("close", () => client.end());
 
     client.on("data", (chunk) => {
+        //every byte will be forwarded to backend blindly , causing a smuggling could happen 
         if (decided) {
             backend.write(chunk);
             return;
@@ -22,6 +23,7 @@ const server = net.createServer((client) => {
 
         head = Buffer.concat([head, chunk]);
 
+        //Gateway only looks at the first line , assuming one connecting is just one request, allowing smuggling  of a nother request 
         const lineEnd = head.indexOf("\r\n");
 
         if (lineEnd === -1) {
@@ -31,7 +33,7 @@ const server = net.createServer((client) => {
         const requestLine = head.slice(0, lineEnd).toString("latin1");
         const [method = "", path = ""] = requestLine.split(" ");
 
-        console.log(`[GATEWAY] ${method} ${path}`);
+        console.log(`${new Date().toISOString()} [GATEWAY] ${method} ${path}`);
 
         decided = true;
 
