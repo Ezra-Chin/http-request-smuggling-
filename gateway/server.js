@@ -16,6 +16,7 @@ const server = net.createServer((client) => {
 
     client.on("data", (chunk) => {
         //every byte will be forwarded to backend blindly , causing a smuggling could happen 
+        //Risk: A second request can be hidden in the same connection and reach the backend without being inspected by the gateway
         if (decided) {
             backend.write(chunk);
             return;
@@ -23,7 +24,8 @@ const server = net.createServer((client) => {
 
         head = Buffer.concat([head, chunk]);
 
-        //Gateway only looks at the first line , assuming one connecting is just one request, allowing smuggling  of a nother request 
+        //Gateway only looks at the first line , assuming one connecting is just one request, allowing smuggling  of another request 
+        //Risk: the attacker could include another additional request after the first one
         const lineEnd = head.indexOf("\r\n");
 
         if (lineEnd === -1) {
@@ -51,6 +53,7 @@ const server = net.createServer((client) => {
         }
 
         //pass on all content to backend wihtout checking 
+        //Risk: the hidden req can bypass the gateway's path restriction and then processed by the backend
         backend.write(head);
     });
 
