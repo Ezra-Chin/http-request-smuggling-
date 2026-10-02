@@ -85,7 +85,7 @@ const CORS_HEADERS =
     "Access-Control-Allow-Headers: Content-Type\r\n";
 
 function respond(socket, method, path) {
-    console.log(`[BACKEND] ${method} ${path}`);
+    console.log(`${new Date().toISOString()} [BACKEND] ${method} ${path}`);
 
     if (method === "OPTIONS") {
         socket.write(

@@ -1,5 +1,7 @@
-Attacking 
-1.Paste this into burp suite 
+Attacking Procedure 
+
+1. Paste this into burp suite 
+
 
 POST /api/dashboard HTTP/1.1
 Host: localhost:5050
